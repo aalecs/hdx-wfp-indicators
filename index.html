@@ -15,28 +15,20 @@
         <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
         <script src="http://d3js.org/topojson.v1.min.js"></script>
         <script src="data/un_world_topo.js"></script>
-        <script src="js/leaflet-grid-graph.js"></script>        
-        <script type="text/javascript">
-            var _gaq = _gaq || [];
-            _gaq.push(['_setAccount', 'UA-46399763-1']);
-            _gaq.push(['_trackPageview']);
-
-            (function() {
-                 var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-                 ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-            })();
-        </script>                
+        <script src="js/leaflet-grid-graph.js"></script>                     
     </head>
     <body>
         <div class="container">
             <div id="maplayer" class="row">
-                <div id="header" class="col-md-12">
+                <div class="col-md-12 hdx-wfp-viz-header">
                     <p>Click a country to explore WFP indicators for those countries</p>
                 </div>                
                 <div id="map" class="col-md-12"></div>
             </div>
             <div id="gridlayer" class="row">
+                <div class="col-md-12 hdx-wfp-viz-header">
+                    <button>Back to world map</button>
+                </div>
                 <div id="gridmap" class="col-md-6"></div>
                 <div id="grid" class="col-md-6"></div>
             </div>

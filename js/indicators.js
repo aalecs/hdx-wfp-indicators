@@ -6,7 +6,7 @@ var config = {};
         {name:'Liberia',code:144,adm:1},
         {name:'Iraq',code:118,adm:1},
         {name:'Sierra Leone',code:221,adm:2},
-        {name:'Yemen',code:269,adm:1}
+        //{name:'Yemen',code:269,adm:1}
     ];
 
     config.columns = [{
@@ -49,15 +49,20 @@ var dataStoreID = '14fa16fe-b4c3-4068-8b38-6ad8c3e75a59';
 
 function initMap(){
     
-    var base_osm = L.tileLayer(
-            'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    var base1 = L.tileLayer(
+            'https://data.hdx.rwlabs.org/mapbox-base-tiles/{z}/{x}/{y}.png',{
+            attribution: '&copy; OpenStreetMap contributors'}
+    );
+
+    var base2 = L.tileLayer(
+        'https://data.hdx.rwlabs.org/mapbox-base-tiles/{z}/{x}/{y}.png',{
             attribution: '&copy; OpenStreetMap contributors'}
     );
           
     var topmap = L.map('map', {
         center: [0,0],
-        zoom: 2,
-        layers: [base_osm]
+        zoom: 3,
+        layers: [base1,base2]
     });
     
     topmap.scrollWheelZoom.disable();
@@ -168,11 +173,8 @@ function compileData(data,geoData,countryID){
     config.columns.forEach(function(c){
         variables.push(c['heading']);
     });
-    console.log(sac);
-    console.log(gridData);
     data.forEach(function(d){
-        if(variables.indexOf(d['Variable'])!=-1){
-            console.log(sac[d[admcode]]);
+        if(variables.indexOf(d['Variable'])!=-1&&sac[d[admcode]]!=undefined){
             gridData[sac[d[admcode]]][d['Variable']] = d['Mean'];
         }
     });
@@ -181,8 +183,10 @@ function compileData(data,geoData,countryID){
 
 
 function initGrid(data,geom,countryID){
+    $('#gridlayer').show();
     var admcode = '';
     var admname = '';
+    console.log(data);
     config.countries.forEach(function(c){
         if(Number(countryID)*1==Number(c.code)*1){
             if(c.adm==1){
@@ -197,7 +201,7 @@ function initGrid(data,geom,countryID){
 
     var columns = [];
     config.columns.forEach(function(c){
-        columns.push(new lg.column(c['heading']).label(c['heading']).domain(c['domain']));
+        columns.push(new lg.column(c['heading']).label(c['display']).domain(c['domain']));
     });
 
     lg.colors = config.colors;
@@ -215,6 +219,15 @@ function initGrid(data,geom,countryID){
         .columns(columns);
 
     lg.init();
+
+    var map = gridmap.map();
+
+    zoomToGeom(geom);
+
+    function zoomToGeom(geom){
+        var bounds = d3.geo.bounds(geom);
+        map.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
+    }    
 }
 
 var topmap = initMap();

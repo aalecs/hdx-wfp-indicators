@@ -98,7 +98,16 @@ var lg =  {
                 this._onHover=val;
                 return this;
             }
-        }                  
+        }
+
+        this.angle = function(val){
+            if(typeof val === 'undefined'){
+                return this._onHover;
+            } else {
+                this._onHover=val;
+                return this;
+            }
+        }                          
 
         this._style = function(feature){
             return {

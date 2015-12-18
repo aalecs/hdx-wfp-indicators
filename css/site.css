@@ -5,3 +5,11 @@
 #gridmap{
     height:500px;
 }
+
+.hdx-wfp-viz-header{
+  height:40px;
+}
+
+#gridlayer {
+  display:none;
+}
