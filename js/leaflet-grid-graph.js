@@ -98,16 +98,7 @@ var lg =  {
                 this._onHover=val;
                 return this;
             }
-        }
-
-        this.angle = function(val){
-            if(typeof val === 'undefined'){
-                return this._onHover;
-            } else {
-                this._onHover=val;
-                return this;
-            }
-        }                          
+        }                  
 
         this._style = function(feature){
             return {
@@ -235,6 +226,7 @@ var lg =  {
         this._axisLabels = true;
         this._colors = 'default';
 
+
         this.label = function(val){
             if(typeof val === 'undefined'){
                 return this._labelName;
@@ -296,7 +288,7 @@ var lg =  {
                 this._labelAccessor = val;
                 return this;
             }
-        };
+        };            
 
         this.colors = function(val){
             if(typeof val === 'undefined'){
@@ -342,6 +334,7 @@ var lg =  {
         this._properties.margin = {top: 120, right: 50, bottom: 20, left: 120};
         lg._gridRegister.push(this);
         this._idnum = lg._gridRegister.length-1;
+        this._labelAngle = 65;
 
         this.width = function(val){
             if(typeof val === 'undefined'){
@@ -422,7 +415,16 @@ var lg =  {
                 this._hWhiteSpace=val;
                 return this;
             }        
-        };        
+        };
+
+        this.labelAngle = function(val){
+            if(typeof val === 'undefined'){
+                return this._labelAngle;
+            } else {
+                this._labelAngle=val;
+                return this;
+            }
+        }                    
 
         this.init = function(){
             this.render();
@@ -537,7 +539,7 @@ var lg =  {
                     .attr("x",0)
                     .attr("y",0)               
                     .style("text-anchor", "front")
-                    .attr("transform", "translate(" + (_xTransform+ _parent._properties.boxWidth/2-10) + "," + -10 + ") rotate(-65)" )
+                    .attr("transform", "translate(" + (_xTransform+ _parent._properties.boxWidth/2-10) + "," + -10 + ") rotate(-"+_parent._labelAngle+")" )
                     .attr("class",function(d){
                         return "sortLabel sortLabel"+i+'id'+_parent._idnum;
                     })

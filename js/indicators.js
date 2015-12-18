@@ -9,40 +9,64 @@ var config = {};
         //{name:'Yemen',code:269,adm:1}
     ];
 
+    var percentAccessor = function(d){
+        if(isNaN(d)){
+            return d;
+        } else {
+            return Math.round(d*100)+'%';
+        }
+    }
+
     config.columns = [{
         heading:'rCSI',
         display:'Reduced Coping Strategy',
-        domain:[0,25]
+        domain:[0,20],
+        labelAccessor:function(d){
+            return d;
+        }
+    },
+    {
+        heading:'FCG',
+        display:'food consumption group',
+        domain:[0,20],
+        labelAccessor:function(d){
+            return d;
+        }
     },
     {
         heading:'BorrowOrHelp>=1',
-        display:'A household borrows or helps 1 or more times per week',
-        domain:[0,1]
-    },
+        display:'% getting help or borrowing',
+        domain:[0,1],
+        labelAccessor:percentAccessor
+    }/*,
     {
         heading:'rCSI>=1',
-        display:'A household borrows or helps 1 or more times per week',
+        display:'% using coping strategies',
         domain:[0,1]
-    },
+    }*/,
     {
         heading:'ReduceNumMeals>=1',
-        display:'A household borrows or helps 1 or more times per week',
-        domain:[0,1]
+        display:'% reducing meals',
+        domain:[0,1],
+        labelAccessor:percentAccessor
     },
     {
         heading:'RestrictConsumption>=1',
-        display:'A household borrows or helps 1 or more times per week',
-        domain:[0,1]
+        display:'% restricting consumption',
+        domain:[0,1],
+        labelAccessor:percentAccessor
     },
     {
         heading:'LimitPortionSize>=1',
-        display:'A household borrows or helps 1 or more times per week',
-        domain:[0,1]
+        display:'% limiting portion size',
+        domain:[0,1],
+        labelAccessor:percentAccessor
     },
     {
         heading:'LessExpensiveFood>=1',
-        display:'A household borrows or helps 1 or more times per week',
-        domain:[0,1]
+        display:'% buying less expensive food',
+        domain:[0,1],
+        labelAccessor:percentAccessor
     }];
 
 var dataStoreID = '14fa16fe-b4c3-4068-8b38-6ad8c3e75a59';
@@ -55,18 +79,27 @@ function initMap(){
     );
 
     var base2 = L.tileLayer(
-        'https://data.hdx.rwlabs.org/mapbox-base-tiles/{z}/{x}/{y}.png',{
+        'https://data.hdx.rwlabs.org/mapbox-layer-tiles/{z}/{x}/{y}.png',{
             attribution: '&copy; OpenStreetMap contributors'}
     );
           
-    var topmap = L.map('map', {
+    var topmap = L.map('wfp-viz-map', {
         center: [0,0],
         zoom: 3,
         layers: [base1,base2]
     });
     
     topmap.scrollWheelZoom.disable();
-    
+
+    var info = L.control();
+
+    info.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'wfp-viz-mapinfo');
+        return div;
+    };
+
+    info.addTo(topmap);    
+    $('.wfp-viz-mapinfo').html('Click country for indicator data');
     return topmap;
 }
 
@@ -95,6 +128,12 @@ function addCountriesToMap(countries){
     var overlay_world = L.geoJson(world.features,{
         style:world_style,
         onEachFeature: function(feature, layer){
+            layer.on('mouseover',function(e){
+                $('.wfp-viz-mapinfo').html('Click to see indicators for '+feature.properties.ADM0_NAME);
+            });
+            layer.on('mouseout',function(e){
+                $('.wfp-viz-mapinfo').html('Click country for indicator data');
+            });            
             layer.on('click', function (e) {
                 initCountry(feature);
             });
@@ -103,7 +142,10 @@ function addCountriesToMap(countries){
 }
 
 function initCountry(feature){
-    $('#maplayer').slideUp();
+    $('#wfp-viz-maplayer').slideUp(function(){
+        $('#wfp-viz-gridmap').html('<p id="wfp-viz-loading">Loading...</i>')
+        $('#wfp-viz-gridlayer').show();
+    });
     var sql =''
     config.countries.forEach(function(c){
         if(Number(feature.properties.ADM0_CODE)*1==Number(c.code)*1){
@@ -183,10 +225,10 @@ function compileData(data,geoData,countryID){
 
 
 function initGrid(data,geom,countryID){
-    $('#gridlayer').show();
+    
     var admcode = '';
     var admname = '';
-    console.log(data);
+
     config.countries.forEach(function(c){
         if(Number(countryID)*1==Number(c.code)*1){
             if(c.adm==1){
@@ -201,34 +243,50 @@ function initGrid(data,geom,countryID){
 
     var columns = [];
     config.columns.forEach(function(c){
-        columns.push(new lg.column(c['heading']).label(c['display']).domain(c['domain']));
+        columns.push(new lg.column(c['heading']).label(c['display']).domain(c['domain']).labelAccessor(c['labelAccessor']));
     });
 
     lg.colors = config.colors;
 
-    var gridmap = new lg.map('#gridmap').geojson(geom).nameAttr(admname).joinAttr(admcode).zoom(1).center([0,0]);
+    var gridmap = new lg.map('#wfp-viz-gridmap').geojson(geom).nameAttr(admname).joinAttr(admcode).zoom(1).center([0,0]);
 
-    var grid = new lg.grid('#grid')
+    var grid = new lg.grid('#wfp-viz-grid')
         .data(data)
-        .width($('#grid').width())
-        .height(500)
+        .width($('#wfp-viz-grid').width())
+        .height(650)
         .nameAttr('name')
         .joinAttr('joinID')
         .hWhiteSpace(5)
         .vWhiteSpace(10)
-        .columns(columns);
+        .columns(columns)
+        .labelAngle(65)
+        .margins({top: 200, right: 50, bottom: 20, left: 120});
 
     lg.init();
 
-    var map = gridmap.map();
+    bottommap = gridmap.map();
+
+    var baselayer2 = L.tileLayer('https://data.hdx.rwlabs.org/mapbox-layer-tiles/{z}/{x}/{y}.png', {});
+
+    baselayer2.addTo(bottommap);
 
     zoomToGeom(geom);
 
     function zoomToGeom(geom){
         var bounds = d3.geo.bounds(geom);
-        map.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
+        bottommap.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
     }    
 }
 
 var topmap = initMap();
+var bottommap;
 addCountriesToMap(config.countries);
+
+$('#wfp-viz-returnmap').on('click',function(e){
+    $('#wfp-viz-grid').html('');
+    $('#wfp-viz-gridlayer').hide();
+    lg._gridRegister = [];
+    bottommap.remove();
+
+    $('#wfp-viz-maplayer').slideDown();
+});
