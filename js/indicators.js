@@ -19,7 +19,7 @@ var config = {};
 
     config.columns = [{
         heading:'rCSI',
-        display:'Reduced Coping Strategy',
+        display:'Reduced coping strategy',
         domain:[0,20],
         labelAccessor:function(d){
             return d;
@@ -27,7 +27,7 @@ var config = {};
     },
     {
         heading:'FCG',
-        display:'food consumption group',
+        display:'Food consumption group',
         domain:[0,20],
         labelAccessor:function(d){
             return d;
@@ -257,7 +257,7 @@ function initGrid(data,geom,countryID){
         .nameAttr('name')
         .joinAttr('joinID')
         .hWhiteSpace(5)
-        .vWhiteSpace(10)
+        .vWhiteSpace(5)
         .columns(columns)
         .labelAngle(65)
         .margins({top: 200, right: 50, bottom: 20, left: 120});
@@ -286,6 +286,7 @@ $('#wfp-viz-returnmap').on('click',function(e){
     $('#wfp-viz-grid').html('');
     $('#wfp-viz-gridlayer').hide();
     lg._gridRegister = [];
+    lg._selectedBar  = -1;
     bottommap.remove();
 
     $('#wfp-viz-maplayer').slideDown();
