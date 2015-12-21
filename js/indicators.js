@@ -9,17 +9,20 @@ var config = {};
         //{name:'Yemen',code:269,adm:1}
     ];
 
-    var percentAccessor = function(d){
-        if(isNaN(d)){
-            return d;
-        } else {
-            return Math.round(d*100)+'%';
-        }
+var dataStoreID = '748b40dd-7bd3-40a3-941b-e76f0bfbe0eb';
+var apiURL = 'https://data.hdx.rwlabs.org/api/3/action/datastore_search_sql';
+    
+var percentAccessor = function(d){
+    if(isNaN(d)){
+        return d;
+    } else {
+        return Math.round(d*100)+'%';
     }
+}
 
     config.columns = [{
         heading:'rCSI',
-        display:'Reduced Coping Strategy',
+        display:'Reduced coping strategy',
         domain:[0,20],
         labelAccessor:function(d){
             return d;
@@ -27,7 +30,7 @@ var config = {};
     },
     {
         heading:'FCG',
-        display:'food consumption group',
+        display:'Food consumption group',
         domain:[0,20],
         labelAccessor:function(d){
             return d;
@@ -68,8 +71,6 @@ var config = {};
         domain:[0,1],
         labelAccessor:percentAccessor
     }];
-
-var dataStoreID = '14fa16fe-b4c3-4068-8b38-6ad8c3e75a59';
 
 function initMap(){
     
@@ -150,13 +151,12 @@ function initCountry(feature){
     config.countries.forEach(function(c){
         if(Number(feature.properties.ADM0_CODE)*1==Number(c.code)*1){
             if(c.adm==1){
-                sql = 'SELECT * FROM "748b40dd-7bd3-40a3-941b-e76f0bfbe0eb" WHERE "ADM0_CODE"=\''+feature.properties.ADM0_CODE+ '\' AND "ADM1_CODE"<>\'\' AND "ADM2_CODE"=\'\' AND "ADM3_CODE"=\'\'';
+                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+feature.properties.ADM0_CODE+ '\' AND "ADM1_CODE"<>\'\' AND "ADM2_CODE"=\'\' AND "ADM3_CODE"=\'\'';
             } else {
-                sql = 'SELECT * FROM "748b40dd-7bd3-40a3-941b-e76f0bfbe0eb" WHERE "ADM0_CODE"=\''+feature.properties.ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\'';
+                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+feature.properties.ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\'';
             }
         }
     });
-    console.log(sql);
     loadData(sql,feature.properties.ADM0_CODE);
 }
 
@@ -167,7 +167,7 @@ function loadData(sql,countryID){
     $.ajax({
       type: 'POST',
       dataType: 'json',
-      url: 'https://data.hdx.rwlabs.org/api/3/action/datastore_search_sql',
+      url: apiURL,
       data: data,
       success: function(data) {
           loadGeo(countryID,data.result.records);
@@ -257,7 +257,7 @@ function initGrid(data,geom,countryID){
         .nameAttr('name')
         .joinAttr('joinID')
         .hWhiteSpace(5)
-        .vWhiteSpace(10)
+        .vWhiteSpace(5)
         .columns(columns)
         .labelAngle(65)
         .margins({top: 200, right: 50, bottom: 20, left: 120});
@@ -286,6 +286,7 @@ $('#wfp-viz-returnmap').on('click',function(e){
     $('#wfp-viz-grid').html('');
     $('#wfp-viz-gridlayer').hide();
     lg._gridRegister = [];
+    lg._selectedBar  = -1;
     bottommap.remove();
 
     $('#wfp-viz-maplayer').slideDown();
