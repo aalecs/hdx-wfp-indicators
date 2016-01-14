@@ -1,3 +1,5 @@
+//sorting not working
+
 var config = {};
 
     config.colors = lg.colors(['#B8DBFE','#89C3FD','#59ABFD','#2A93FC','#206ED7','#154AB1','#0B258C','#000066']);
@@ -23,7 +25,7 @@ var percentAccessor = function(d){
     config.columns = [{
         heading:'rCSI',
         display:'Reduced coping strategy',
-        domain:[0,20],
+        domain:[0,30],
         labelAccessor:function(d){
             return d;
         }
@@ -142,22 +144,23 @@ function addCountriesToMap(countries){
     }).addTo(topmap);    
 }
 
-function initCountry(feature){
+function initCountry(ADM0_CODE){
     $('#wfp-viz-maplayer').slideUp(function(){
         $('#wfp-viz-gridmap').html('<p id="wfp-viz-loading">Loading...</i>')
         $('#wfp-viz-gridlayer').show();
     });
     var sql =''
     config.countries.forEach(function(c){
-        if(Number(feature.properties.ADM0_CODE)*1==Number(c.code)*1){
+        //if(Number(feature.properties.ADM0_CODE)*1==Number(c.code)*1){
+        if(Number(ADM0_CODE)*1==Number(c.code)*1){
             if(c.adm==1){
-                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+feature.properties.ADM0_CODE+ '\' AND "ADM1_CODE"<>\'\' AND "ADM2_CODE"=\'\' AND "ADM3_CODE"=\'\'';
+                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+ADM0_CODE+ '\' AND "ADM1_CODE"<>\'\' AND "ADM2_CODE"=\'\' AND "ADM3_CODE"=\'\' ORDER BY LENGTH("SvyYear"),"SvyYear", LENGTH("SvyMonthNum"),"SvyMonthNum"';
             } else {
-                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+feature.properties.ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\'';
+                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\' ORDER BY LENGTH("SvyYear"), "SvyYear",LENGTH("SvyMonthNum"),"SvyMonthNum"';
             }
         }
     });
-    loadData(sql,feature.properties.ADM0_CODE);
+    loadData(sql,ADM0_CODE);
 }
 
 function loadData(sql,countryID){
@@ -205,30 +208,39 @@ function compileData(data,geoData,countryID){
     var gridData = [];
     geoData.features.forEach(function(f,i){
         sac[f.properties[admcode]] = i;
-        var gd = {joinID:f.properties[admcode],name:f.properties[admname]};
-        config.columns.forEach(function(c){
-            gd[c['heading']] = 'No Data';
-        });
-        gridData.push(gd);
     });
     var variables = [];
     config.columns.forEach(function(c){
         variables.push(c['heading']);
     });
+    var outputData = {};
+    var dates = [];
     data.forEach(function(d){
         if(variables.indexOf(d['Variable'])!=-1&&sac[d[admcode]]!=undefined){
-            gridData[sac[d[admcode]]][d['Variable']] = d['Mean'];
+            if(dates.indexOf(d['SvyDate'])==-1){
+                var gridData = [];
+                geoData.features.forEach(function(f,i){
+                    var gd = {joinID:f.properties[admcode],name:f.properties[admname]};
+                    config.columns.forEach(function(c){
+                        gd[c['heading']] = 'No Data';
+                    });
+                    gridData.push(gd);
+                });                
+                outputData[d['SvyDate']] = gridData;
+                dates.push(d['SvyDate']);
+            }
+            outputData[d['SvyDate']][sac[d[admcode]]][d['Variable']] = d['Mean'];
         }
     });
-    initGrid(gridData,geoData,countryID);
+    initGrid(outputData,dates,geoData,countryID);
 }
 
-
-function initGrid(data,geom,countryID){
+function initGrid(data,dates,geom,countryID){
     
     var admcode = '';
     var admname = '';
-
+    var lastdate = dates[dates.length-1];
+    generateTimeSlider(dates,data);
     config.countries.forEach(function(c){
         if(Number(countryID)*1==Number(c.code)*1){
             if(c.adm==1){
@@ -251,9 +263,9 @@ function initGrid(data,geom,countryID){
     var gridmap = new lg.map('#wfp-viz-gridmap').geojson(geom).nameAttr(admname).joinAttr(admcode).zoom(1).center([0,0]);
 
     var grid = new lg.grid('#wfp-viz-grid')
-        .data(data)
+        .data(data[lastdate])
         .width($('#wfp-viz-grid').width())
-        .height(650)
+        .height(600)
         .nameAttr('name')
         .joinAttr('joinID')
         .hWhiteSpace(5)
@@ -272,14 +284,97 @@ function initGrid(data,geom,countryID){
 
     zoomToGeom(geom);
 
+    lg._gridRegister[0].updateData = function(data,columns){
+        _parent = lg._gridRegister[0];
+        _parent._data = data;
+        console.log(_parent._highlighted)
+        columns.forEach(function(v,i){
+
+            data.sort(function(a, b) {
+                    return a[_parent._nameAttr].localeCompare(b[_parent._nameAttr]);
+                });
+
+                var newData = [];        
+
+            var newData = [];
+
+            data.forEach(function(d,i){
+                var nd = {};
+                nd.pos = d.pos;
+                nd.join = d[_parent._joinAttr];
+                nd.value = d[v._dataName];
+                newData.push(nd);
+            });
+
+            d3.selectAll('.bars'+i+'id'+_parent._idnum)
+                .data(newData)
+                .transition()
+                .attr("width", function(d){
+                        if(v._valueAccessor(d.value)==null||isNaN(v._valueAccessor(d.value)) || v._valueAccessor(d.value)===''){
+                            return _parent._properties.boxWidth;
+                        }
+                        return _parent._properties.x[i](v._valueAccessor(d.value));
+                    })
+                .attr("fill",function(d,i2){
+                        if(v._valueAccessor(d.value)==null||isNaN(v._valueAccessor(d.value)) || v._valueAccessor(d.value)===''){
+                            return '#cccccc';
+                        }                        
+                        var c = v._colorAccessor(d.value,i2,v._domain[1])
+                        return v._colors[c];
+                    });
+
+            var dataSubset = [];
+
+            newData.forEach(function(d){
+                dataSubset.push({'key':d.join,'value':d.value});
+            });                
+
+            if(_parent._highlighted == i){    
+                lg.mapRegister.colorMap(dataSubset,v);
+            }
+            d3.selectAll('.selectbars'+i+'id'+_parent._idnum)
+                .data(newData)
+                .on("mouseover.color",function(d,i2){
+                        if(lg._selectedBar==-1){
+                            lg.mapRegister.colorMap(dataSubset,v);
+                        }                        
+                    })
+                .on('click.color',function(d,i2){
+                        lg.mapRegister.colorMap(dataSubset,v);
+                    })
+
+            d3.selectAll('.sortLabel'+i+'id'+_parent._idnum).on("mouseover.color",function(d,i2){
+                        lg.mapRegister.colorMap(dataSubset,v);
+                    });                
+        });
+    }
+
     function zoomToGeom(geom){
         var bounds = d3.geo.bounds(geom);
         bottommap.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
-    }    
+    }
+
+    function generateTimeSlider(dates,data){
+        max = dates.length-1;
+        $('#wfp-viz-slider').html('<input id="wfp-viz-slider-input" type="range" min=0 max='+max+' value='+max+'>');
+        
+        $('#wfp-viz-slider-input').on('change',function(e){
+            /*grid.data(data[dates[$('#wfp-viz-slider-input').val()]]);
+            $('#wfp-viz-grid').html('');
+            lg._gridRegister.forEach(function(e){
+                e.init(); 
+            });*/
+            lg._gridRegister[0].updateData(data[dates[$('#wfp-viz-slider-input').val()]],lg._gridRegister[0]._initColumns(lg._gridRegister[0]._columns));
+        });   
+    }
+
 }
 
-var topmap = initMap();
+
 var bottommap;
+initCountry(144);
+/*
+var topmap = initMap();
 addCountriesToMap(config.countries);
 
 $('#wfp-viz-returnmap').on('click',function(e){
@@ -290,4 +385,4 @@ $('#wfp-viz-returnmap').on('click',function(e){
     bottommap.remove();
 
     $('#wfp-viz-maplayer').slideDown();
-});
+});*/

@@ -335,6 +335,7 @@ var lg =  {
         lg._gridRegister.push(this);
         this._idnum = lg._gridRegister.length-1;
         this._labelAngle = 65;
+        this._highlighted = -1
 
         this.width = function(val){
             if(typeof val === 'undefined'){
@@ -493,7 +494,6 @@ var lg =  {
                 data.sort(function(a, b) {
                     return a[_parent._nameAttr].localeCompare(b[_parent._nameAttr]);
                 });
-
                 var newData = [];
 
                 data.forEach(function(d,i){
@@ -503,6 +503,7 @@ var lg =  {
                     nd.value = d[v._dataName];
                     newData.push(nd);
                 });
+
                 /*
                 var max = d3.max(newData,function(d){
                     return Number(v._valueAccessor(d.value));
@@ -544,7 +545,7 @@ var lg =  {
                         return "sortLabel sortLabel"+i+'id'+_parent._idnum;
                     })
                     .on("click",function(){
-                        _parent._update(data,columns,v,nameAttr);
+                        _parent._update(_parent._data,columns,v,nameAttr);
                     });
 
                 topLabels.on("mouseover",function(d,i2){
@@ -553,9 +554,12 @@ var lg =  {
                             d3.selectAll('.sortLabel').style("font-weight","normal");
                             d3.selectAll('.maxLabel'+i+'id'+_parent._idnum).attr("opacity",1);
                             d3.selectAll('.sortLabel'+i+'id'+_parent._idnum).style("font-weight","bold");
-                            lg.mapRegister.colorMap(dataSubset,v);
+                            _parent._highlighted = i;
                         }
 
+                    })
+                    .on("mouseover.color",function(d,i2){
+                        lg.mapRegister.colorMap(dataSubset,v);
                     });
 
                 d3.selectAll('.sortLabel').call(tipsort);
@@ -632,13 +636,21 @@ var lg =  {
                             d3.selectAll('.sortLabel').style("font-weight","normal");
                             d3.selectAll('.maxLabel'+i+'id'+_parent._idnum).attr("opacity",1);
                             d3.selectAll('.sortLabel'+i+'id'+_parent._idnum).style("font-weight","bold");
-                            lg.mapRegister.colorMap(dataSubset,v);
+                            _parent._highlighted = i;
+                            
                         }
-
+                    })
+                    .on("mouseover.color",function(d,i2){
+                        if(lg._selectedBar==-1){
+                            lg.mapRegister.colorMap(dataSubset,v);
+                        }                        
                     })
                     .on("mouseout",function(d,i2){
                         d3.selectAll('.horLine'+i2+'id'+_parent._idnum).attr("opacity",0);
                         d3.selectAll('.dashgeom'+d.join).attr("stroke-width",1);  
+                    })
+                    .on('click.color',function(d,i2){
+                        lg.mapRegister.colorMap(dataSubset,v);
                     })
                     .on('click',function(d,i2){
                         if(lg._selectedBar ==i){
@@ -649,8 +661,8 @@ var lg =  {
                             lg._selectedBar = i;
                             d3.selectAll('.maxLabel'+lg._selectedBar+'id'+_parent._idnum).attr("opacity",1);
                             d3.selectAll('.sortLabel'+lg._selectedBar+'id'+_parent._idnum).style("font-weight","bold");
-                            lg.mapRegister.colorMap(dataSubset,v);
-                        };
+                            _parent._highlighted = i;                            
+                        }
                     });
 
                 d3.selectAll('.selectbars'+i+'id'+_parent._idnum).on('mouseover.something', tips[i].show).on('mouseout.something', tips[i].hide);
@@ -717,6 +729,7 @@ var lg =  {
                     }                    
                     return parseFloat(sortBy._valueAccessor(b[sortBy._dataName]))-parseFloat(sortBy._valueAccessor(a[sortBy._dataName]));
                 });
+
             data.forEach(function(d,i){
                 d.pos = i;
             });
@@ -754,15 +767,18 @@ var lg =  {
             });
 
             d3.selectAll(".horLineTop")
+                .data(data) 
                 .attr("y1",function(d,i){return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace})
                 .attr("y2",function(d,i){return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace});
 
             d3.selectAll(".horLineBot")
+                .data(data)
                 .attr("y1",function(d,i){return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace})
                 .attr("y2",function(d,i){return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace});             
 
 
-            d3.selectAll(".nameLabels")             
+            d3.selectAll(".nameLabels")
+                .data(data)             
                 .transition()
                 .duration(750)
                 .attr("y",function(d){
