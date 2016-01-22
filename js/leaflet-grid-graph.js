@@ -211,7 +211,7 @@ var lg =  {
                 if(column._valueAccessor(d.value)==null||isNaN(column._valueAccessor(d.value))||column._valueAccessor(d.value)===''){
                     d3.selectAll('.dashgeom'+d.key).attr('fill','#cccccc').attr('fill-opacity',0.8);
                 } else {                        
-                    var c = column._colorAccessor(d.value,i,column._domain[1]);
+                    var c = column._colorAccessor(d.value,i,column._domain[0],column._domain[1]);
                     d3.selectAll('.dashgeom'+d.key).attr('fill',column._colors[c]).attr('fill-opacity',0.8);
                 }
             });
@@ -303,8 +303,8 @@ var lg =  {
             return d
         };
 
-        this._colorAccessor = function(d,i,max){
-            var c = Math.floor(d/max*lg._colors.length);
+        this._colorAccessor = function(d,i,min,max){
+            var c = Math.floor(((d-min)/(max-min))*lg._colors.length);
             if(c==lg._colors.length){c=lg._colors.length-1}
             return c
         };
@@ -527,7 +527,7 @@ var lg =  {
                         if(v._valueAccessor(d.value)==null||isNaN(v._valueAccessor(d.value)) || v._valueAccessor(d.value)===''){
                             return '#cccccc';
                         }                        
-                        var c = v._colorAccessor(d.value,i2,v._domain[1])
+                        var c = v._colorAccessor(d.value,i2,v._domain[0],v._domain[1])
                         return v._colors[c];
                     });                 
 

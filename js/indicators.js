@@ -1,4 +1,4 @@
-//sorting not working
+//fix labels
 
 var config = {};
 
@@ -22,59 +22,102 @@ var percentAccessor = function(d){
     }
 }
 
+var vanilla = function(d){
+    return d;
+}
+
     config.columns = [{
         heading:'rCSI',
         display:'Reduced coping strategy',
         domain:[0,30],
         labelAccessor:function(d){
             return d;
-        }
+        },
+        group:'Overview'
     },
     {
-        heading:'FCG',
-        display:'Food consumption group',
-        domain:[0,20],
+        heading:'rCSI>=1',
+        display:'Reduced coping strategy >=1',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Overview'
+    },    
+    {
+        heading:'FCG<=2',
+        display:'Food consumption group <=2',
+        domain:[0,30],
         labelAccessor:function(d){
             return d;
-        }
+        },
+        group:'Overview'
+    },   
+    {
+        heading:'IDP_YN',
+        display:'IDP_YN',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Overview'
+    },    
+    {
+        heading:'Sentiment',
+        display:'Sentiment',
+        domain:[-1,1],
+        labelAccessor:vanilla,
+        group:'Overview'
+    },
+    {
+        heading:'rCSI',
+        display:'Reduced coping strategy',
+        domain:[0,30],
+        labelAccessor:function(d){
+            return d;
+        },
+        group:'rCSI'
+    },
+    {
+        heading:'rCSI>=1',
+        display:'Reduced coping strategy >=1',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'rCSI'
     },
     {
         heading:'BorrowOrHelp>=1',
         display:'% getting help or borrowing',
         domain:[0,1],
-        labelAccessor:percentAccessor
-    }/*,
-    {
-        heading:'rCSI>=1',
-        display:'% using coping strategies',
-        domain:[0,1]
-    }*/,
+        labelAccessor:percentAccessor,
+        group:'rCSI'
+    },
     {
         heading:'ReduceNumMeals>=1',
         display:'% reducing meals',
         domain:[0,1],
-        labelAccessor:percentAccessor
+        labelAccessor:percentAccessor,
+        group:'rCSI'
     },
     {
         heading:'RestrictConsumption>=1',
         display:'% restricting consumption',
         domain:[0,1],
-        labelAccessor:percentAccessor
+        labelAccessor:percentAccessor,
+        group:'rCSI'
     },
     {
         heading:'LimitPortionSize>=1',
         display:'% limiting portion size',
         domain:[0,1],
-        labelAccessor:percentAccessor
+        labelAccessor:percentAccessor,
+        group:'rCSI'
     },
     {
         heading:'LessExpensiveFood>=1',
         display:'% buying less expensive food',
         domain:[0,1],
-        labelAccessor:percentAccessor
+        labelAccessor:percentAccessor,
+        group:'rCSI'
     }];
 
-function initMap(){
+/*function initMap(){
     
     var base1 = L.tileLayer(
             'https://data.hdx.rwlabs.org/mapbox-base-tiles/{z}/{x}/{y}.png',{
@@ -143,7 +186,7 @@ function addCountriesToMap(countries){
         }  
     }).addTo(topmap);    
 }
-
+*/
 function initCountry(ADM0_CODE){
     $('#wfp-viz-maplayer').slideUp(function(){
         $('#wfp-viz-gridmap').html('<p id="wfp-viz-loading">Loading...</i>')
@@ -232,10 +275,22 @@ function compileData(data,geoData,countryID){
             outputData[d['SvyDate']][sac[d[admcode]]][d['Variable']] = d['Mean'];
         }
     });
-    initGrid(outputData,dates,geoData,countryID);
+    initGrid(outputData,dates,geoData,countryID,'Overview',false);
+
+    $('#catoverview').on('click',function(e){
+        lg._gridRegister = [];
+        $('#wfp-viz-grid').html('');
+        initGrid(outputData,dates,geoData,countryID,'Overview',true);
+    });    
+
+    $('#catrcsi').on('click',function(e){
+        lg._gridRegister = [];
+        $('#wfp-viz-grid').html('');
+        initGrid(outputData,dates,geoData,countryID,'rCSI',true);
+    });
 }
 
-function initGrid(data,dates,geom,countryID){
+function initGrid(data,dates,geom,countryID,category,reset){
     
     var admcode = '';
     var admname = '';
@@ -255,7 +310,9 @@ function initGrid(data,dates,geom,countryID){
 
     var columns = [];
     config.columns.forEach(function(c){
-        columns.push(new lg.column(c['heading']).label(c['display']).domain(c['domain']).labelAccessor(c['labelAccessor']));
+        if(c['group']==category){
+            columns.push(new lg.column(c['heading']).label(c['display']).domain(c['domain']).labelAccessor(c['labelAccessor']));
+        }
     });
 
     lg.colors = config.colors;
@@ -274,20 +331,24 @@ function initGrid(data,dates,geom,countryID){
         .labelAngle(65)
         .margins({top: 200, right: 50, bottom: 20, left: 120});
 
-    lg.init();
+    if(!reset){
+        lg.init();
+        bottommap = gridmap.map();
 
-    bottommap = gridmap.map();
+        var baselayer2 = L.tileLayer('https://data.hdx.rwlabs.org/mapbox-layer-tiles/{z}/{x}/{y}.png', {});
 
-    var baselayer2 = L.tileLayer('https://data.hdx.rwlabs.org/mapbox-layer-tiles/{z}/{x}/{y}.png', {});
+        baselayer2.addTo(bottommap);
 
-    baselayer2.addTo(bottommap);
-
-    zoomToGeom(geom);
+        zoomToGeom(geom);        
+    } else {
+        lg._gridRegister.forEach(function(e){
+           e.init(); 
+        });  
+    }
 
     lg._gridRegister[0].updateData = function(data,columns){
         _parent = lg._gridRegister[0];
         _parent._data = data;
-        console.log(_parent._highlighted)
         columns.forEach(function(v,i){
 
             data.sort(function(a, b) {
@@ -319,7 +380,7 @@ function initGrid(data,dates,geom,countryID){
                         if(v._valueAccessor(d.value)==null||isNaN(v._valueAccessor(d.value)) || v._valueAccessor(d.value)===''){
                             return '#cccccc';
                         }                        
-                        var c = v._colorAccessor(d.value,i2,v._domain[1])
+                        var c = v._colorAccessor(d.value,i2,v._domain[0],v._domain[1])
                         return v._colors[c];
                     });
 
