@@ -1,3 +1,5 @@
+//fix labels
+
 var config = {};
 
     config.colors = lg.colors(['#B8DBFE','#89C3FD','#59ABFD','#2A93FC','#206ED7','#154AB1','#0B258C','#000066']);
@@ -6,7 +8,7 @@ var config = {};
         {name:'Liberia',code:144,adm:1},
         {name:'Iraq',code:118,adm:1},
         {name:'Sierra Leone',code:221,adm:2},
-        //{name:'Yemen',code:269,adm:1}
+        {name:'Yemen',code:269,adm:1}
     ];
 
 var dataStoreID = '748b40dd-7bd3-40a3-941b-e76f0bfbe0eb';
@@ -20,59 +22,228 @@ var percentAccessor = function(d){
     }
 }
 
+var vanilla = function(d){
+    return d;
+}
+
     config.columns = [{
         heading:'rCSI',
         display:'Reduced coping strategy',
-        domain:[0,20],
-        labelAccessor:function(d){
-            return d;
-        }
+        domain:[0,100],
+        labelAccessor:vanilla,
+        group:'Overview',
+        value:'Median'
     },
     {
-        heading:'FCG',
-        display:'Food consumption group',
-        domain:[0,20],
-        labelAccessor:function(d){
-            return d;
-        }
+        heading:'rCSI>=1',
+        display:'% using reduced coping strategy',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Overview',
+        value:'Mean'
+    },    
+    {
+        heading:'FCG<=2',
+        display:'Food consumption group <=2',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Overview',
+        value:'Mean'
+    },   
+    {
+        heading:'IDP_YN==Y',
+        display:'% IDPs',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Overview',
+        value:'Mean'
+    },    
+    {
+        heading:'Sentiment',
+        display:'Sentiment',
+        domain:[-1,1],
+        labelAccessor:vanilla,
+        group:'Overview',
+        value:'Median'
+    },
+    {
+        heading:'rCSI',
+        display:'Reduced coping strategy Score',
+        domain:[0,100],
+        labelAccessor:vanilla,
+        group:'rCSI',
+        value:'Median'
+    },
+    {
+        heading:'rCSI>=1',
+        display:'% using reduced coping strategy',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'rCSI',
+        value:'Mean'
     },
     {
         heading:'BorrowOrHelp>=1',
         display:'% getting help or borrowing',
         domain:[0,1],
-        labelAccessor:percentAccessor
-    }/*,
-    {
-        heading:'rCSI>=1',
-        display:'% using coping strategies',
-        domain:[0,1]
-    }*/,
+        labelAccessor:percentAccessor,
+        group:'rCSI',
+        value:'Mean'
+    },
     {
         heading:'ReduceNumMeals>=1',
         display:'% reducing meals',
         domain:[0,1],
-        labelAccessor:percentAccessor
+        labelAccessor:percentAccessor,
+        group:'rCSI',
+        value:'Mean'
     },
     {
         heading:'RestrictConsumption>=1',
         display:'% restricting consumption',
         domain:[0,1],
-        labelAccessor:percentAccessor
+        labelAccessor:percentAccessor,
+        group:'rCSI',
+        value:'Mean'
     },
     {
         heading:'LimitPortionSize>=1',
         display:'% limiting portion size',
         domain:[0,1],
-        labelAccessor:percentAccessor
+        labelAccessor:percentAccessor,
+        group:'rCSI',
+        value:'Mean'
     },
     {
         heading:'LessExpensiveFood>=1',
         display:'% buying less expensive food',
         domain:[0,1],
-        labelAccessor:percentAccessor
+        labelAccessor:percentAccessor,
+        group:'rCSI',
+        value:'Mean'
+    },
+    {
+        heading:'FCS',
+        display:'Food Consumption Score',
+        domain:[0,100],
+        labelAccessor:vanilla,
+        group:'FCS',
+        value:'Median'
+    },
+    {
+        heading:'FCG==1',
+        display:'Food Consumption Group =1',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'FCS',
+        value:'Mean'
+    },
+    {
+        heading:'FCG==2',
+        display:'Food Consumption Group =2',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'FCS',
+        value:'Mean'
+    },
+    {
+        heading:'FCG==3',
+        display:'Food Consumption Group =3',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'FCS',
+        value:'Mean'
+    },
+    {
+        heading:'Protein>=3',
+        display:'Protein>=3',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'FCS',
+        value:'Mean'
+    },
+    {
+        heading:'Dairy>=3',
+        display:'Dairy>=3',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'FCS',
+        value:'Mean'
+    },
+    {
+        heading:'Staples>=3',
+        display:'Staples>=3',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'FCS',
+        value:'Mean'
+    },
+    {
+        heading:'Veg>=3',
+        display:'Veg>=3',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'FCS',
+        value:'Mean'
+    },
+    {
+        heading:'HouseType==Camp',
+        display:'% in Camp',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Housing',
+        value:'Mean'
+    },
+    {
+        heading:'HouseType==Other',
+        display:'% in Other',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Housing',
+        value:'Mean'
+    },
+    {
+        heading:'HouseType==Own_home',
+        display:'% in Own home',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Housing',
+        value:'Mean'
+    },
+    {
+        heading:'HouseType==Public_building',
+        display:'% in Public building',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Housing',
+        value:'Mean'
+    },
+    {
+        heading:'HouseType==Rental',
+        display:'% in Rental',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Housing',
+        value:'Mean'
+    },
+    {
+        heading:'HouseType==Staying_with_someone_for_free',
+        display:'% staying with someone for free',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Housing',
+        value:'Mean'
+    },
+    {
+        heading:'HouseType==Unfinished_building',
+        display:'% in unfinished building',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'Housing',
+        value:'Mean'
     }];
 
-function initMap(){
+/*function initMap(){
     
     var base1 = L.tileLayer(
             'https://data.hdx.rwlabs.org/mapbox-base-tiles/{z}/{x}/{y}.png',{
@@ -141,23 +312,24 @@ function addCountriesToMap(countries){
         }  
     }).addTo(topmap);    
 }
-
-function initCountry(feature){
+*/
+function initCountry(ADM0_CODE){
     $('#wfp-viz-maplayer').slideUp(function(){
         $('#wfp-viz-gridmap').html('<p id="wfp-viz-loading">Loading...</i>')
         $('#wfp-viz-gridlayer').show();
     });
     var sql =''
     config.countries.forEach(function(c){
-        if(Number(feature.properties.ADM0_CODE)*1==Number(c.code)*1){
+        //if(Number(feature.properties.ADM0_CODE)*1==Number(c.code)*1){
+        if(Number(ADM0_CODE)*1==Number(c.code)*1){
             if(c.adm==1){
-                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+feature.properties.ADM0_CODE+ '\' AND "ADM1_CODE"<>\'\' AND "ADM2_CODE"=\'\' AND "ADM3_CODE"=\'\'';
+                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+ADM0_CODE+ '\' AND "ADM1_CODE"<>\'\' AND "ADM2_CODE"=\'\' AND "ADM3_CODE"=\'\' ORDER BY LENGTH("SvyYear"),"SvyYear", LENGTH("SvyMonthNum"),"SvyMonthNum"';
             } else {
-                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+feature.properties.ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\'';
+                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\' ORDER BY LENGTH("SvyYear"), "SvyYear",LENGTH("SvyMonthNum"),"SvyMonthNum"';
             }
         }
     });
-    loadData(sql,feature.properties.ADM0_CODE);
+    loadData(sql,ADM0_CODE);
 }
 
 function loadData(sql,countryID){
@@ -205,30 +377,65 @@ function compileData(data,geoData,countryID){
     var gridData = [];
     geoData.features.forEach(function(f,i){
         sac[f.properties[admcode]] = i;
-        var gd = {joinID:f.properties[admcode],name:f.properties[admname]};
-        config.columns.forEach(function(c){
-            gd[c['heading']] = 'No Data';
-        });
-        gridData.push(gd);
     });
     var variables = [];
+    var meanormedian = {};
     config.columns.forEach(function(c){
         variables.push(c['heading']);
+        meanormedian[c['heading']] = c['value'];
     });
+    var outputData = {};
+    var dates = [];
     data.forEach(function(d){
         if(variables.indexOf(d['Variable'])!=-1&&sac[d[admcode]]!=undefined){
-            gridData[sac[d[admcode]]][d['Variable']] = d['Mean'];
+            if(dates.indexOf(d['SvyDate'])==-1){
+                var gridData = [];
+                geoData.features.forEach(function(f,i){
+                    var gd = {joinID:f.properties[admcode],name:f.properties[admname]};
+                    config.columns.forEach(function(c){
+                        gd[c['heading']] = 'No Data';
+                    });
+                    gridData.push(gd);
+                });                
+                outputData[d['SvyDate']] = gridData;
+                dates.push(d['SvyDate']);
+            }
+            outputData[d['SvyDate']][sac[d[admcode]]][d['Variable']] = d[meanormedian[d['Variable']]];
         }
     });
-    initGrid(gridData,geoData,countryID);
+    initGrid(outputData,dates,geoData,countryID);
+
+    $('#catoverview').on('click',function(e){
+        $('.wfp-viz-grid').hide();
+        lg._selectedBar = -1;
+        $('#wfp-viz-grid-overview').show();
+    });    
+
+    $('#catrcsi').on('click',function(e){
+        $('.wfp-viz-grid').hide();
+        lg._selectedBar = -1;
+        $('#wfp-viz-grid-rcsi').show();
+    });
+
+    $('#catfcs').on('click',function(e){
+        $('.wfp-viz-grid').hide();
+        lg._selectedBar = -1;
+        $('#wfp-viz-grid-fcs').show();
+    });
+
+    $('#cathousing').on('click',function(e){
+        $('.wfp-viz-grid').hide();
+        lg._selectedBar = -1;
+        $('#wfp-viz-grid-housing').show();
+    });        
 }
 
-
-function initGrid(data,geom,countryID){
+function initGrid(data,dates,geom,countryID){
     
     var admcode = '';
     var admname = '';
-
+    var lastdate = dates[dates.length-1];
+    generateTimeSlider(dates,data);
     config.countries.forEach(function(c){
         if(Number(countryID)*1==Number(c.code)*1){
             if(c.adm==1){
@@ -241,45 +448,143 @@ function initGrid(data,geom,countryID){
         }
     });
 
-    var columns = [];
-    config.columns.forEach(function(c){
-        columns.push(new lg.column(c['heading']).label(c['display']).domain(c['domain']).labelAccessor(c['labelAccessor']));
-    });
-
-    lg.colors = config.colors;
-
     var gridmap = new lg.map('#wfp-viz-gridmap').geojson(geom).nameAttr(admname).joinAttr(admcode).zoom(1).center([0,0]);
 
-    var grid = new lg.grid('#wfp-viz-grid')
-        .data(data)
-        .width($('#wfp-viz-grid').width())
-        .height(650)
-        .nameAttr('name')
-        .joinAttr('joinID')
-        .hWhiteSpace(5)
-        .vWhiteSpace(5)
-        .columns(columns)
-        .labelAngle(65)
-        .margins({top: 200, right: 50, bottom: 20, left: 120});
+    var categories = ['Overview','rCSI','FCS','Housing'];
+
+    var grid = {}; 
+
+    categories.forEach(function(cat){
+        var columns = [];
+        config.columns.forEach(function(c){
+            if(c['group']==cat){
+                columns.push(new lg.column(c['heading']).label(c['display']).domain(c['domain']).labelAccessor(c['labelAccessor']));
+            }
+        });
+
+        lg.colors = config.colors;
+
+        grid[cat] = new lg.grid('#wfp-viz-grid-'+cat.toLowerCase())
+            .data(data[lastdate])
+            .width($('#wfp-viz-grid-'+cat.toLowerCase()).width())
+            .height(675)
+            .nameAttr('name')
+            .joinAttr('joinID')
+            .hWhiteSpace(5)
+            .vWhiteSpace(5)
+            .columns(columns)
+            .labelAngle(65)
+            .margins({top: 200, right: 50, bottom: 20, left: 120});
+    });    
 
     lg.init();
-
     bottommap = gridmap.map();
 
     var baselayer2 = L.tileLayer('https://data.hdx.rwlabs.org/mapbox-layer-tiles/{z}/{x}/{y}.png', {});
 
     baselayer2.addTo(bottommap);
 
-    zoomToGeom(geom);
+    zoomToGeom(geom);        
+
+    lg._gridRegister[0].updateData = updateData;
+    lg._gridRegister[1].updateData = updateData;
+    lg._gridRegister[2].updateData = updateData;
+    lg._gridRegister[3].updateData = updateData;
 
     function zoomToGeom(geom){
         var bounds = d3.geo.bounds(geom);
         bottommap.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
-    }    
+    }
+
+    function generateTimeSlider(dates,data){
+        max = dates.length-1;
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        $('#wfp-viz-slider').html('<input id="wfp-viz-slider-input" type="range" min=0 max='+max+' value='+max+'>');
+        
+        $('#wfp-viz-slider-input').on('change',function(e){
+            lg._gridRegister[0].updateData(data[dates[$('#wfp-viz-slider-input').val()]]);
+            lg._gridRegister[1].updateData(data[dates[$('#wfp-viz-slider-input').val()]]);
+            lg._gridRegister[2].updateData(data[dates[$('#wfp-viz-slider-input').val()]]);
+            lg._gridRegister[3].updateData(data[dates[$('#wfp-viz-slider-input').val()]]);
+            var mdy = dates[$('#wfp-viz-slider-input').val()].split('/');
+            $('#wfp-viz-date').html(months[mdy[0]]+' '+mdy[2]);
+        });
+        var mdy = dates[$('#wfp-viz-slider-input').val()].split('/');
+        $('#wfp-viz-date').html(months[mdy[0]]+' '+mdy[2]);   
+    }
+
 }
 
-var topmap = initMap();
+updateData = function(data){
+        columns = this._initColumns(this._columns);
+        _parent = this;
+        _parent._data = data;
+        columns.forEach(function(v,i){
+
+            data.sort(function(a, b) {
+                    return a[_parent._nameAttr].localeCompare(b[_parent._nameAttr]);
+                });
+
+                var newData = [];        
+
+            var newData = [];
+
+            data.forEach(function(d,i){
+                var nd = {};
+                nd.pos = d.pos;
+                nd.join = d[_parent._joinAttr];
+                nd.value = d[v._dataName];
+                newData.push(nd);
+            });
+
+            d3.selectAll('.bars'+i+'id'+_parent._idnum)
+                .data(newData)
+                .transition()
+                .attr("width", function(d){
+                        if(v._valueAccessor(d.value)==null||isNaN(v._valueAccessor(d.value)) || v._valueAccessor(d.value)===''){
+                            return _parent._properties.boxWidth;
+                        }
+                        return _parent._properties.x[i](v._valueAccessor(d.value));
+                    })
+                .attr("fill",function(d,i2){
+                        if(v._valueAccessor(d.value)==null||isNaN(v._valueAccessor(d.value)) || v._valueAccessor(d.value)===''){
+                            return '#cccccc';
+                        }                        
+                        var c = v._colorAccessor(d.value,i2,v._domain[0],v._domain[1])
+                        return v._colors[c];
+                    });
+
+            var dataSubset = [];
+
+            newData.forEach(function(d){
+                dataSubset.push({'key':d.join,'value':d.value});
+            });                
+
+            if(_parent._highlighted == i){    
+                lg.mapRegister.colorMap(dataSubset,v);
+            }
+            d3.selectAll('.selectbars'+i+'id'+_parent._idnum)
+                .data(newData)
+                .on("mouseover.color",function(d,i2){
+                        if(lg._selectedBar==-1){
+                            lg.mapRegister.colorMap(dataSubset,v);
+                        }                        
+                    })
+                .on('click.color',function(d,i2){
+                        lg.mapRegister.colorMap(dataSubset,v);
+                    })
+
+            d3.selectAll('.sortLabel'+i+'id'+_parent._idnum).on("mouseover.color",function(d,i2){
+                        lg.mapRegister.colorMap(dataSubset,v);
+                    });                
+        });
+    }
+
+
 var bottommap;
+initCountry(269);
+/*
+var topmap = initMap();
 addCountriesToMap(config.countries);
 
 $('#wfp-viz-returnmap').on('click',function(e){
@@ -290,4 +595,4 @@ $('#wfp-viz-returnmap').on('click',function(e){
     bottommap.remove();
 
     $('#wfp-viz-maplayer').slideDown();
-});
+});*/

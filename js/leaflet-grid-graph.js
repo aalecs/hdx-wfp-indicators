@@ -165,8 +165,8 @@ var lg =  {
             function onEachFeature(feature, layer) {
 
                 layer.on("mouseover",function(f,l){
-                    columnName = _parent._currentColumn;
-                    dataValue = findCurrentData(f.target.feature.properties[_parent._joinAttr]);
+                    columnName = _parent._currentColumn._labelName;
+                    dataValue = _parent._currentColumn._labelAccessor(findCurrentData(f.target.feature.properties[_parent._joinAttr]));
                     _parent._info.update(f.target.feature.properties[_parent._nameAttr] + ' - ' + dataValue, columnName);
                     _parent._onHover(f.target.feature);
                 });
@@ -195,7 +195,7 @@ var lg =  {
         this.colorMap = function (data,column){
 
             this._currentData = data;
-            this._currentColumn = column._labelName;
+            this._currentColumn = column;
             var _parent = this;
             /*
             var max = d3.max(data,function(d){
@@ -211,7 +211,7 @@ var lg =  {
                 if(column._valueAccessor(d.value)==null||isNaN(column._valueAccessor(d.value))||column._valueAccessor(d.value)===''){
                     d3.selectAll('.dashgeom'+d.key).attr('fill','#cccccc').attr('fill-opacity',0.8);
                 } else {                        
-                    var c = column._colorAccessor(d.value,i,column._domain[1]);
+                    var c = column._colorAccessor(d.value,i,column._domain[0],column._domain[1]);
                     d3.selectAll('.dashgeom'+d.key).attr('fill',column._colors[c]).attr('fill-opacity',0.8);
                 }
             });
@@ -303,8 +303,8 @@ var lg =  {
             return d
         };
 
-        this._colorAccessor = function(d,i,max){
-            var c = Math.floor(d/max*lg._colors.length);
+        this._colorAccessor = function(d,i,min,max){
+            var c = Math.floor(((d-min)/(max-min))*lg._colors.length);
             if(c==lg._colors.length){c=lg._colors.length-1}
             return c
         };
@@ -335,6 +335,7 @@ var lg =  {
         lg._gridRegister.push(this);
         this._idnum = lg._gridRegister.length-1;
         this._labelAngle = 65;
+        this._highlighted = -1
 
         this.width = function(val){
             if(typeof val === 'undefined'){
@@ -493,7 +494,6 @@ var lg =  {
                 data.sort(function(a, b) {
                     return a[_parent._nameAttr].localeCompare(b[_parent._nameAttr]);
                 });
-
                 var newData = [];
 
                 data.forEach(function(d,i){
@@ -503,6 +503,7 @@ var lg =  {
                     nd.value = d[v._dataName];
                     newData.push(nd);
                 });
+
                 /*
                 var max = d3.max(newData,function(d){
                     return Number(v._valueAccessor(d.value));
@@ -526,7 +527,7 @@ var lg =  {
                         if(v._valueAccessor(d.value)==null||isNaN(v._valueAccessor(d.value)) || v._valueAccessor(d.value)===''){
                             return '#cccccc';
                         }                        
-                        var c = v._colorAccessor(d.value,i2,v._domain[1])
+                        var c = v._colorAccessor(d.value,i2,v._domain[0],v._domain[1])
                         return v._colors[c];
                     });                 
 
@@ -544,7 +545,7 @@ var lg =  {
                         return "sortLabel sortLabel"+i+'id'+_parent._idnum;
                     })
                     .on("click",function(){
-                        _parent._update(data,columns,v,nameAttr);
+                        _parent._update(_parent._data,columns,v,nameAttr);
                     });
 
                 topLabels.on("mouseover",function(d,i2){
@@ -553,9 +554,14 @@ var lg =  {
                             d3.selectAll('.sortLabel').style("font-weight","normal");
                             d3.selectAll('.maxLabel'+i+'id'+_parent._idnum).attr("opacity",1);
                             d3.selectAll('.sortLabel'+i+'id'+_parent._idnum).style("font-weight","bold");
-                            lg.mapRegister.colorMap(dataSubset,v);
+                            _parent._highlighted = i;
                         }
 
+                    })
+                    .on("mouseover.color",function(d,i2){
+                        if(lg._selectedBar==-1){
+                            lg.mapRegister.colorMap(dataSubset,v);
+                        }
                     });
 
                 d3.selectAll('.sortLabel').call(tipsort);
@@ -632,13 +638,21 @@ var lg =  {
                             d3.selectAll('.sortLabel').style("font-weight","normal");
                             d3.selectAll('.maxLabel'+i+'id'+_parent._idnum).attr("opacity",1);
                             d3.selectAll('.sortLabel'+i+'id'+_parent._idnum).style("font-weight","bold");
-                            lg.mapRegister.colorMap(dataSubset,v);
+                            _parent._highlighted = i;
+                            
                         }
-
+                    })
+                    .on("mouseover.color",function(d,i2){
+                        if(lg._selectedBar==-1){
+                            lg.mapRegister.colorMap(dataSubset,v);
+                        }                        
                     })
                     .on("mouseout",function(d,i2){
                         d3.selectAll('.horLine'+i2+'id'+_parent._idnum).attr("opacity",0);
                         d3.selectAll('.dashgeom'+d.join).attr("stroke-width",1);  
+                    })
+                    .on('click.color',function(d,i2){
+                        lg.mapRegister.colorMap(dataSubset,v);
                     })
                     .on('click',function(d,i2){
                         if(lg._selectedBar ==i){
@@ -649,8 +663,8 @@ var lg =  {
                             lg._selectedBar = i;
                             d3.selectAll('.maxLabel'+lg._selectedBar+'id'+_parent._idnum).attr("opacity",1);
                             d3.selectAll('.sortLabel'+lg._selectedBar+'id'+_parent._idnum).style("font-weight","bold");
-                            lg.mapRegister.colorMap(dataSubset,v);
-                        };
+                            _parent._highlighted = i;                            
+                        }
                     });
 
                 d3.selectAll('.selectbars'+i+'id'+_parent._idnum).on('mouseover.something', tips[i].show).on('mouseout.something', tips[i].hide);
@@ -669,7 +683,7 @@ var lg =  {
                 .attr("x2", _parent._properties.width-_parent._hWhiteSpace)
                 .attr("y2", function(d,i){return _parent._properties.boxHeight*(i)+(i-0.5)*_parent._vWhiteSpace})
                 .attr("opacity",0)
-                .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineTop"})
+                .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineTop horLineTop"+'id'+_parent._idnum})
                 .attr("stroke-width", 1)
                 .attr("stroke", "#ddd");
 
@@ -684,7 +698,7 @@ var lg =  {
                 .attr("x2", _parent._properties.width-_parent._hWhiteSpace)
                 .attr("y2", function(d,i){return _parent._properties.boxHeight*(i+1)+(i+0.5)*_parent._vWhiteSpace})
                 .attr("opacity",0)
-                .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineBot"})
+                .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineBot horLineBot"+'id'+_parent._idnum})
                 .attr("stroke-width", 1)
                 .attr("stroke", "#ddd");
 
@@ -702,7 +716,7 @@ var lg =  {
                 .attr("y", function(d,i) {
                     return _parent._properties.boxHeight*(i+0.5)+i*_parent._vWhiteSpace;
                 })
-                .attr('class','nameLabels');        
+                .attr('class','nameLabels'+'id'+_parent._idnum);        
                     
         }
 
@@ -717,6 +731,7 @@ var lg =  {
                     }                    
                     return parseFloat(sortBy._valueAccessor(b[sortBy._dataName]))-parseFloat(sortBy._valueAccessor(a[sortBy._dataName]));
                 });
+
             data.forEach(function(d,i){
                 d.pos = i;
             });
@@ -753,16 +768,19 @@ var lg =  {
 
             });
 
-            d3.selectAll(".horLineTop")
+            d3.selectAll(".horLineTop"+'id'+_parent._idnum)
+                .data(data) 
                 .attr("y1",function(d,i){return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace})
                 .attr("y2",function(d,i){return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace});
 
-            d3.selectAll(".horLineBot")
+            d3.selectAll(".horLineBot"+'id'+_parent._idnum)
+                .data(data)
                 .attr("y1",function(d,i){return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace})
                 .attr("y2",function(d,i){return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace});             
 
 
-            d3.selectAll(".nameLabels")             
+            d3.selectAll(".nameLabels"+'id'+_parent._idnum)
+                .data(data)             
                 .transition()
                 .duration(750)
                 .attr("y",function(d){
