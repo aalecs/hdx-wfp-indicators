@@ -165,8 +165,8 @@ var lg =  {
             function onEachFeature(feature, layer) {
 
                 layer.on("mouseover",function(f,l){
-                    columnName = _parent._currentColumn;
-                    dataValue = findCurrentData(f.target.feature.properties[_parent._joinAttr]);
+                    columnName = _parent._currentColumn._labelName;
+                    dataValue = _parent._currentColumn._labelAccessor(findCurrentData(f.target.feature.properties[_parent._joinAttr]));
                     _parent._info.update(f.target.feature.properties[_parent._nameAttr] + ' - ' + dataValue, columnName);
                     _parent._onHover(f.target.feature);
                 });
@@ -195,7 +195,7 @@ var lg =  {
         this.colorMap = function (data,column){
 
             this._currentData = data;
-            this._currentColumn = column._labelName;
+            this._currentColumn = column;
             var _parent = this;
             /*
             var max = d3.max(data,function(d){
@@ -559,7 +559,9 @@ var lg =  {
 
                     })
                     .on("mouseover.color",function(d,i2){
-                        lg.mapRegister.colorMap(dataSubset,v);
+                        if(lg._selectedBar==-1){
+                            lg.mapRegister.colorMap(dataSubset,v);
+                        }
                     });
 
                 d3.selectAll('.sortLabel').call(tipsort);
@@ -681,7 +683,7 @@ var lg =  {
                 .attr("x2", _parent._properties.width-_parent._hWhiteSpace)
                 .attr("y2", function(d,i){return _parent._properties.boxHeight*(i)+(i-0.5)*_parent._vWhiteSpace})
                 .attr("opacity",0)
-                .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineTop"})
+                .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineTop horLineTop"+'id'+_parent._idnum})
                 .attr("stroke-width", 1)
                 .attr("stroke", "#ddd");
 
@@ -696,7 +698,7 @@ var lg =  {
                 .attr("x2", _parent._properties.width-_parent._hWhiteSpace)
                 .attr("y2", function(d,i){return _parent._properties.boxHeight*(i+1)+(i+0.5)*_parent._vWhiteSpace})
                 .attr("opacity",0)
-                .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineBot"})
+                .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineBot horLineBot"+'id'+_parent._idnum})
                 .attr("stroke-width", 1)
                 .attr("stroke", "#ddd");
 
@@ -714,7 +716,7 @@ var lg =  {
                 .attr("y", function(d,i) {
                     return _parent._properties.boxHeight*(i+0.5)+i*_parent._vWhiteSpace;
                 })
-                .attr('class','nameLabels');        
+                .attr('class','nameLabels'+'id'+_parent._idnum);        
                     
         }
 
@@ -766,18 +768,18 @@ var lg =  {
 
             });
 
-            d3.selectAll(".horLineTop")
+            d3.selectAll(".horLineTop"+'id'+_parent._idnum)
                 .data(data) 
                 .attr("y1",function(d,i){return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace})
                 .attr("y2",function(d,i){return _parent._properties.boxHeight*(d.pos)+(d.pos-0.5)*_parent._vWhiteSpace});
 
-            d3.selectAll(".horLineBot")
+            d3.selectAll(".horLineBot"+'id'+_parent._idnum)
                 .data(data)
                 .attr("y1",function(d,i){return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace})
                 .attr("y2",function(d,i){return _parent._properties.boxHeight*(d.pos+1)+(d.pos+0.5)*_parent._vWhiteSpace});             
 
 
-            d3.selectAll(".nameLabels")
+            d3.selectAll(".nameLabels"+'id'+_parent._idnum)
                 .data(data)             
                 .transition()
                 .duration(750)

@@ -20,9 +20,9 @@
     <body>
         <div id="wfp-viz-ind" class="container">
             <div id="wfp-viz-maplayer" class="row">
-                <div class="col-md-12 hdx-wfp-viz-header">
+                <!-- <div class="col-md-12 hdx-wfp-viz-header">
                     <p>Click a country to explore WFP indicators for those countries</p>
-                </div>                
+                </div>  -->               
                 <div id="wfp-viz-map" class="col-md-12"></div>
             </div>
             <div id="wfp-viz-gridlayer" class="row">
@@ -30,21 +30,23 @@
                     <!-- <div class="col-md-3 wfp-viz-header">
                         <button id="wfp-viz-returnmap">Back to world map</button>
                     </div> -->
-                    <div class="col-md-9 wfp-viz-header">
-                        Hover the grid to see the map for each variable.  Clicking the variable name will sort the table by that variable.
+                    <div class="col-md-12 wfp-viz-header">
+                        <p>Hover the grid to see the map for each variable. Clicking the variable name will sort the table by that variable. Use the timeslider to see how the data changes over time. Click the blue theme buttons to see other variables.</p>
                     </div>
                 </div>
                 <div class="row">
-                    <div id="wfp-viz-slider" class="col-md-6">
-
-                    </div>
+                    <div id="wfp-viz-slider" class="col-md-3"></div>
+                    <div id="wfp-viz-date" class="col-md-3"></div>
                     <div id="wfp-viz-categories" class="col-md-6">
-                        <button id='catoverview'>Overview</button><button id='catrcsi'>rCSI</button>
+                        <button id='catoverview' class="btn btn-default">Overview</button><button id='catrcsi' class="btn btn-default">rCSI</button><button id='catfcs' class="btn btn-default">FCS</button><button id='cathousing' class="btn btn-default">Housing</button>
                     </div>
                 </div>
                 <div class="row">
                     <div id="wfp-viz-gridmap" class="col-md-6"></div>
-                    <div id="wfp-viz-grid" class="col-md-6"></div>
+                    <div id="wfp-viz-grid-overview" class="col-md-6 wfp-viz-grid"></div>
+                    <div id="wfp-viz-grid-rcsi" class="col-md-6 wfp-viz-grid"></div>
+                    <div id="wfp-viz-grid-fcs" class="col-md-6 wfp-viz-grid"></div>
+                    <div id="wfp-viz-grid-housing" class="col-md-6 wfp-viz-grid"></div>
                 </div>
             </div>
         </div>

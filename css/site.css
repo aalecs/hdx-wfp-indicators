@@ -1,5 +1,5 @@
-#wfp-viz-ind {
-  height:700px;
+#wfp-viz-ind .wfp-viz-header{
+    margin-bottom:20px;
 }
 
 #wfp-viz-ind #wfp-viz-map{
@@ -10,24 +10,20 @@
     height:650px;
 }
 
-#wfp-viz-ind .wfp-viz-header{
-  height:50px;
-}
-
 #wfp-viz-ind #wfp-viz-gridlayer {
-  display:none;
+    display:none;
 }
 
 #wfp-viz-ind #wfp-viz-returnmap {
-  background-color: #2A93FC;
-  border-radius: 6px;
-  display: inline-block;
-  padding: 10px 30px;
-  font-weight: 400;
-  font-size: 14px;
-  color: #ffffff;
-  text-transform: uppercase;
-  border:0px;
+    background-color: #2A93FC;
+    border-radius: 6px;
+    display: inline-block;
+    padding: 10px 30px;
+    font-weight: 400;
+    font-size: 14px;
+    color: #ffffff;
+    text-transform: uppercase;
+    border:0px;
 }
 
 #wfp-viz-ind .wfp-viz-mapinfo {
@@ -38,3 +34,29 @@
     border-radius: 5px;
     font-size:1.5em;
  }
+
+#wfp-viz-ind #wfp-viz-grid-rcsi {
+    display: none;
+}
+
+#wfp-viz-ind #wfp-viz-grid-fcs {
+    display: none;
+}
+
+#wfp-viz-ind #wfp-viz-grid-housing {
+    display: none;
+}
+
+#wfp-viz-ind .btn-default {
+    margin-right:10px;
+    background-color: #2A93FC;
+    color: #ffffff;
+}
+
+#wfp-viz-date {
+    font-size:2em;
+    color:#999999;
+}
+#wfp-viz-slider {
+    padding-top:14px;
+}
