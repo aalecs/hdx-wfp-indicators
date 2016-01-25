@@ -492,6 +492,7 @@ function initGrid(data,dates,geom,countryID){
     lg._gridRegister[3].updateData = updateData;
 
     function zoomToGeom(geom){
+        bottommap.invalidateSize()
         var bounds = d3.geo.bounds(geom);
         bottommap.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
     }
