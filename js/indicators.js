@@ -513,7 +513,6 @@ function initGrid(data,dates,geom,countryID){
         var bounds = d3.geo.bounds(geom);
         bottommap.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
     }
-
     function generateTimeSlider(dates,data){
         max = dates.length-1;
         var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -523,11 +522,11 @@ function initGrid(data,dates,geom,countryID){
             for (var i = 0; i < categories.length; i++){
                 lg._gridRegister[i].updateData(data[dates[$('#wfp-viz-slider-input').val()]]);
             }
-            var mdy = dates[$('#wfp-viz-slider-input').val()].split('/');
-            $('#wfp-viz-date').html(months[mdy[0]]+' '+mdy[2]);
+            var mdy = new Date(dates[$('#wfp-viz-slider-input').val()]);
+            $('#wfp-viz-date').html(months[mdy.getMonth()]+' '+ mdy.getFullYear());
         });
-        var mdy = dates[$('#wfp-viz-slider-input').val()].split('/');
-        $('#wfp-viz-date').html(months[mdy[0]]+' '+mdy[2]);   
+        var mdy = new Date(dates[$('#wfp-viz-slider-input').val()]);
+        $('#wfp-viz-date').html(months[mdy.getMonth()]+' '+mdy.getFullYear());
     }
 
 }
