@@ -28,7 +28,7 @@ var vanilla = function(d){
 
     config.columns = [{
         heading:'rCSI',
-        display:'Reduced coping strategy',
+        display:'rCSI Median',
         domain:[0,100],
         labelAccessor:vanilla,
         group:'Overview',
@@ -36,7 +36,7 @@ var vanilla = function(d){
     },
     {
         heading:'rCSI>=1',
-        display:'% using reduced coping strategy',
+        display:'% using reduced coping mechanisms',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'Overview',
@@ -44,7 +44,7 @@ var vanilla = function(d){
     },    
     {
         heading:'FCG<=2',
-        display:'Food consumption group <=2',
+        display:'Borderline+Poor Food Consumption',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'Overview',
@@ -60,7 +60,7 @@ var vanilla = function(d){
     },    
     {
         heading:'Sentiment',
-        display:'Sentiment',
+        display:'Perceptions of Food Security',
         domain:[-1,1],
         labelAccessor:vanilla,
         group:'Overview',
@@ -75,8 +75,16 @@ var vanilla = function(d){
         value:'Median'
     },
     {
+        heading:'rCSI',
+        display:'rCSI Mean',
+        domain:[0,100],
+        labelAccessor:vanilla,
+        group:'rCSI',
+        value:'Mean'
+    },
+    {
         heading:'rCSI>=1',
-        display:'% using reduced coping strategy',
+        display:'% using reduced coping mechanisms',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'rCSI',
@@ -132,7 +140,7 @@ var vanilla = function(d){
     },
     {
         heading:'FCG==1',
-        display:'Food Consumption Group =1',
+        display:'Poor Food Consumption',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'FCS',
@@ -140,7 +148,7 @@ var vanilla = function(d){
     },
     {
         heading:'FCG==2',
-        display:'Food Consumption Group =2',
+        display:'Borderline Food Consumption',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'FCS',
@@ -148,7 +156,7 @@ var vanilla = function(d){
     },
     {
         heading:'FCG==3',
-        display:'Food Consumption Group =3',
+        display:'Acceptable Food Consumption',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'FCS',
@@ -156,7 +164,7 @@ var vanilla = function(d){
     },
     {
         heading:'Protein>=3',
-        display:'Protein>=3',
+        display:'Consuming Proteins 3 or more Days/Week',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'FCS',
@@ -164,7 +172,7 @@ var vanilla = function(d){
     },
     {
         heading:'Dairy>=3',
-        display:'Dairy>=3',
+        display:'Consuming Dairy 3 or more Days/Week',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'FCS',
@@ -172,7 +180,7 @@ var vanilla = function(d){
     },
     {
         heading:'Staples>=3',
-        display:'Staples>=3',
+        display:'Consuming Staples 3 or more Days/Week',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'FCS',
@@ -180,7 +188,15 @@ var vanilla = function(d){
     },
     {
         heading:'Veg>=3',
-        display:'Veg>=3',
+        display:'Consuming Vegetables 3 or more Days/Week',
+        domain:[0,1],
+        labelAccessor:percentAccessor,
+        group:'FCS',
+        value:'Mean'
+    },
+    {
+        heading:'Sugars>=6',
+        display:'Consuming Sugars 6 or more Days/Week',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'FCS',
@@ -327,6 +343,7 @@ function initCountry(ADM0_CODE){
             } else {
                 sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\' ORDER BY LENGTH("SvyYear"), "SvyYear",LENGTH("SvyMonthNum"),"SvyMonthNum"';
             }
+            //sql = 'SELECT * FROM "'+dataStoreID + '" ';
         }
     });
     loadData(sql,ADM0_CODE);
@@ -480,7 +497,7 @@ function initGrid(data,dates,geom,countryID){
     lg.init();
     bottommap = gridmap.map();
 
-    var baselayer2 = L.tileLayer('https://data.hdx.rwlabs.org/mapbox-layer-tiles/{z}/{x}/{y}.png', {});
+    var baselayer2 = L.tileLayer('https://{s}.tiles.mapbox.com/v3/reliefweb.l43d4f5j/{z}/{x}/{y}.png', {});
 
     baselayer2.addTo(bottommap);
 
