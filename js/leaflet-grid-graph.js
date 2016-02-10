@@ -103,7 +103,7 @@ var lg =  {
         this._style = function(feature){
             return {
                 weight: 1,
-                opacity: 0.8,
+                opacity: 0.7,
                 color:'#000000',
                 fillOpacity: 0,
                 className: 'dashgeom dashgeom'+feature.properties[lg.mapRegister._joinAttr]
@@ -145,8 +145,8 @@ var lg =  {
             this._info.onAdd = function (map) {
                 this._div = L.DomUtil.create('div', 'mapinfo');
                 this.update();
-                    return this._div;
-                };
+                return this._div;
+            };
 
             this._info.update = function (name, colName) {
                 this._div.innerHTML = (name ? name: 'Hover a country for details');
@@ -166,13 +166,23 @@ var lg =  {
 
                 layer.on("mouseover",function(f,l){
                     columnName = _parent._currentColumn._labelName;
-                    dataValue = _parent._currentColumn._labelAccessor(findCurrentData(f.target.feature.properties[_parent._joinAttr]));
+                    var currentData = findCurrentData(f.target.feature.properties[_parent._joinAttr]);
+                    dataValue = _parent._currentColumn._labelAccessor(currentData.value);
+                    dataValue = parseFloat(dataValue).toFixed(1);
                     _parent._info.update(f.target.feature.properties[_parent._nameAttr] + ' - ' + dataValue, columnName);
                     _parent._onHover(f.target.feature);
+
+                    d3.selectAll('.horLine'+ currentData.pos +'id0').attr("opacity",1);
+                    d3.selectAll('.dashgeom'+ currentData.key).attr("stroke-width",3);
+                    d3.selectAll('.dashgeom'+ currentData.key).attr("opacity",1);
                 });
 
                 layer.on("mouseout",function(f,l){
+                    var currentData = findCurrentData(f.target.feature.properties[_parent._joinAttr]);
                     _parent._info.update();
+                    d3.selectAll('.horLine'+ currentData.pos +'id0').attr("opacity",0);
+                    d3.selectAll('.dashgeom'+ currentData.key).attr("stroke-width",1);
+                    d3.selectAll('.dashgeom'+ currentData.key).attr("opacity",0.7);
                 });
 
                 layer.on("click",function(f,l){
@@ -180,10 +190,10 @@ var lg =  {
                 });
 
                 function findCurrentData(joinAttr){
-                    var value = 'N/A'; 
+                    var value = {value: 'N/A'};
                     _parent._currentData.forEach(function(d){
                         if(d.key==joinAttr){
-                            value = d.value;
+                            value = d;
                         }
                     });
 
@@ -209,10 +219,10 @@ var lg =  {
             */
             data.forEach(function(d,i){
                 if(column._valueAccessor(d.value)==null||isNaN(column._valueAccessor(d.value))||column._valueAccessor(d.value)===''){
-                    d3.selectAll('.dashgeom'+d.key).attr('fill','#cccccc').attr('fill-opacity',0.8);
-                } else {                        
+                    d3.selectAll('.dashgeom'+d.key).attr('fill','#cccccc').attr('fill-opacity',0.7);
+                } else {
                     var c = column._colorAccessor(d.value,i,column._domain[0],column._domain[1]);
-                    d3.selectAll('.dashgeom'+d.key).attr('fill',column._colors[c]).attr('fill-opacity',0.8);
+                    d3.selectAll('.dashgeom'+d.key).attr('fill',column._colors[c]).attr('fill-opacity',0.7);
                 }
             });
         }
@@ -498,7 +508,7 @@ var lg =  {
 
                 data.forEach(function(d,i){
                     var nd = {};
-                    nd.pos = d.pos;
+                    nd.pos = i;
                     nd.join = d[_parent._joinAttr];
                     nd.value = d[v._dataName];
                     newData.push(nd);
@@ -593,18 +603,18 @@ var lg =  {
                     .attr("y2", _parent._properties.height-_parent._vWhiteSpace/2)
                     .attr("opacity",0)
                     .attr("class",function(d){return "maxLabel maxLabel"+i+'id'+_parent._idnum})
-                    .attr("stroke-width", 1)
-                    .attr("stroke", "#ddd");                    
+                    .attr("stroke-width", 2)
+                    .attr("stroke", "#f2645a");
 
                 g.append("line")
-                    .attr("x1", _parent._properties.boxWidth*(i)+(i)*_parent._hWhiteSpace)
+                    .attr("x1", _parent._properties.boxWidth*(i)+(i)*_parent._hWhiteSpace - 2)
                     .attr("y1", -_parent._hWhiteSpace/2)
-                    .attr("x2", _parent._properties.boxWidth*(i)+(i)*_parent._hWhiteSpace)
+                    .attr("x2", _parent._properties.boxWidth*(i)+(i)*_parent._hWhiteSpace - 2)
                     .attr("y2", _parent._properties.height-_parent._vWhiteSpace/2)
                     .attr("opacity",0)
                     .attr("class",function(d){return "maxLabel maxLabel"+i+'id'+_parent._idnum})
-                    .attr("stroke-width", 1)
-                    .attr("stroke", "#ddd");                   
+                    .attr("stroke-width", 2)
+                    .attr("stroke", "#f2645a");
 
                 var g = _grid.append("g");
 
@@ -625,13 +635,15 @@ var lg =  {
 
                 var dataSubset = [];
                     newData.forEach(function(d){
-                        dataSubset.push({'key':d.join,'value':d.value});
+                        dataSubset.push({'key':d.join,'value':d.value, 'pos': d.pos});
                     });
 
                 selectBars.on("mouseover",function(d,i2){
 
-                        d3.selectAll('.dashgeom'+d.join).attr("stroke-width",3);                        
+                        d3.selectAll('.dashgeom'+d.join).attr("stroke-width",3);
+                        d3.selectAll('.dashgeom'+d.join).attr("opacity",1);
                         d3.selectAll('.horLine'+i2+'id'+_parent._idnum).attr("opacity",1);
+                        d3.selectAll('.nameLabels')
 
                         if(lg._selectedBar==-1){
                             d3.selectAll('.maxLabel').attr("opacity",0);
@@ -649,7 +661,8 @@ var lg =  {
                     })
                     .on("mouseout",function(d,i2){
                         d3.selectAll('.horLine'+i2+'id'+_parent._idnum).attr("opacity",0);
-                        d3.selectAll('.dashgeom'+d.join).attr("stroke-width",1);  
+                        d3.selectAll('.dashgeom'+d.join).attr("stroke-width",1);
+                        d3.selectAll('.dashgeom'+d.join).attr("opacity",0.7);
                     })
                     .on('click.color',function(d,i2){
                         lg.mapRegister.colorMap(dataSubset,v);
@@ -685,7 +698,7 @@ var lg =  {
                 .attr("opacity",0)
                 .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineTop horLineTop"+'id'+_parent._idnum})
                 .attr("stroke-width", 1)
-                .attr("stroke", "#ddd");
+                .attr("stroke", "#f2645a");
 
             var g = _grid.append("g");
 
@@ -700,7 +713,7 @@ var lg =  {
                 .attr("opacity",0)
                 .attr("class",function(d,i){return "horLine"+i+'id'+_parent._idnum+" horLineBot horLineBot"+'id'+_parent._idnum})
                 .attr("stroke-width", 1)
-                .attr("stroke", "#ddd");
+                .attr("stroke", "#f2645a");
 
             _grid.append("g")
                 .selectAll("text")
@@ -709,12 +722,12 @@ var lg =  {
                 .append("text")
                 .text(function(d){
                     return d[nameAttr];
-                })        
+                })
                 .attr("x", function(d) {
                     return 5-_parent._properties.margin.left;
                 })
                 .attr("y", function(d,i) {
-                    return _parent._properties.boxHeight*(i+0.5)+i*_parent._vWhiteSpace;
+                    return _parent._properties.boxHeight*(i+0.5)+i*_parent._vWhiteSpace + 4;
                 })
                 .attr('class','nameLabels'+'id'+_parent._idnum);        
                     
@@ -784,7 +797,7 @@ var lg =  {
                 .transition()
                 .duration(750)
                 .attr("y",function(d){
-                    return _parent._properties.boxHeight*(d.pos+0.5)+d.pos*_parent._vWhiteSpace;
+                    return _parent._properties.boxHeight*(d.pos+0.5)+d.pos*_parent._vWhiteSpace + 4;
                 });
         }        
     }   
