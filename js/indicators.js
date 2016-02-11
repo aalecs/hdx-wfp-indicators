@@ -453,7 +453,6 @@ function initGrid(data,dates,geom,countryID){
     var admcode = '';
     var admname = '';
     var lastdate = dates[dates.length-1];
-    generateTimeSlider(dates,data);
     config.countries.forEach(function(c){
         if(Number(countryID)*1==Number(c.code)*1){
             if(c.adm==1){
@@ -493,7 +492,7 @@ function initGrid(data,dates,geom,countryID){
             .columns(columns)
             .labelAngle(65)
             .margins({top: 300, right: 70, bottom: 20, left: 120});
-    });    
+    });
 
     lg.init();
     bottommap = gridmap.map();
@@ -507,6 +506,7 @@ function initGrid(data,dates,geom,countryID){
     for (var i = 0; i < categories.length; i++){
         lg._gridRegister[i].updateData = updateData;
     }
+    generateTimeSlider(dates,data);
 
     function zoomToGeom(geom){
         bottommap.invalidateSize()
@@ -514,9 +514,10 @@ function initGrid(data,dates,geom,countryID){
         bottommap.fitBounds([[bounds[0][1],bounds[0][0]],[bounds[1][1],bounds[1][0]]]);
     }
     function generateTimeSlider(dates,data){
-        max = dates.length-1;
+        var max = dates.length-1;
+        var min = 0;
         var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        $('#wfp-viz-slider').html('<input id="wfp-viz-slider-input" type="range" min=0 max='+max+' value='+max+'>');
+        $('#wfp-viz-slider').html('<input id="wfp-viz-slider-input" type="range" min=0 max='+max+' value='+min+'>');
         
         $('#wfp-viz-slider-input').on('change',function(e){
             for (var i = 0; i < categories.length; i++){
@@ -525,8 +526,10 @@ function initGrid(data,dates,geom,countryID){
             var mdy = new Date(dates[$('#wfp-viz-slider-input').val()]);
             $('#wfp-viz-date').html(months[mdy.getMonth()]+' '+ mdy.getFullYear());
         });
+        $('#wfp-viz-slider-input').change();
         var mdy = new Date(dates[$('#wfp-viz-slider-input').val()]);
         $('#wfp-viz-date').html(months[mdy.getMonth()]+' '+mdy.getFullYear());
+
     }
 
 }
