@@ -51,6 +51,11 @@
     margin-right:10px;
     background-color: #2A93FC;
     color: #ffffff;
+    width: 170px;
+    white-space: normal;
+    font-size: 14px;
+    height: 55px;
+    margin-top: -20px;
 }
 
 #wfp-viz-date {

@@ -168,7 +168,6 @@ var lg =  {
                     columnName = _parent._currentColumn._labelName;
                     var currentData = findCurrentData(f.target.feature.properties[_parent._joinAttr]);
                     dataValue = _parent._currentColumn._labelAccessor(currentData.value);
-                    dataValue = parseFloat(dataValue).toFixed(1);
                     _parent._info.update(f.target.feature.properties[_parent._nameAttr] + ' - ' + dataValue, columnName);
                     _parent._onHover(f.target.feature);
 

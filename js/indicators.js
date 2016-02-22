@@ -23,15 +23,23 @@ var percentAccessor = function(d){
 }
 
 var vanilla = function(d){
-    return d;
-}
+        return d;
+    },
+    round1 = function(d){
+        var dataValue = parseFloat(d).toFixed(1);
+        return dataValue;
+    },
+    round2 = function(d){
+        var dataValue = parseFloat(d).toFixed(2);
+        return dataValue;
+    };
 
 config.columns = [
     {
         heading:'rCSI',
         display:'rCSI Median',
         domain:[0,100],
-        labelAccessor:vanilla,
+        labelAccessor:round1,
         group:'Overview',
         value:'Median'
     },
@@ -45,7 +53,7 @@ config.columns = [
     },    
     {
         heading:'FCG<=2',
-        display:'Borderline+Poor Food Consumption',
+        display:'% Poor+Borderline Food Consumption',
         domain:[0,1],
         labelAccessor:percentAccessor,
         group:'Overview',
@@ -69,9 +77,9 @@ config.columns = [
     },
     {
         heading:'rCSI',
-        display:'Reduced coping strategy Score',
+        display:'rCSI Median',
         domain:[0,100],
-        labelAccessor:vanilla,
+        labelAccessor:round1,
         group:'rCSI',
         value:'Median'
     },
@@ -79,7 +87,7 @@ config.columns = [
         heading:'rCSI',
         display:'rCSI Mean',
         domain:[0,100],
-        labelAccessor:vanilla,
+        labelAccessor:round2,
         group:'rCSI',
         value:'Mean'
     },
@@ -133,11 +141,11 @@ config.columns = [
     },
     {
         heading:'FCS',
-        display:'Food Consumption Score',
-        domain:[0,100],
-        labelAccessor:vanilla,
+        display:'Mean Food Consumption Score',
+        domain:[0,112],
+        labelAccessor:round2,
         group:'FCS',
-        value:'Median'
+        value:'Mean'
     },
     {
         heading:'FCG==1',
@@ -343,7 +351,7 @@ function initCountry(ADM0_CODE){
             if(c.adm==1){
                 sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+ADM0_CODE+ '\' AND "ADM1_CODE"<>\'\' AND "ADM2_CODE"=\'\' AND "ADM3_CODE"=\'\' ORDER BY LENGTH("SvyYear"),"SvyYear", LENGTH("SvyMonthNum"),"SvyMonthNum"';
             } else {
-                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\' ORDER BY LENGTH("SvyYear"), "SvyYear",LENGTH("SvyMonthNum"),"SvyMonthNum"';
+                sql = 'SELECT * FROM "'+dataStoreID+'" WHERE "ADM0_CODE"=\''+ADM0_CODE+ '\' AND "ADM2_CODE"<>\'\' AND "ADM3_CODE"=\'\' AND ("CnfIntvHi"-"CnfIntvLo")/"Mean"<=0.12 ORDER BY LENGTH("SvyYear"), "SvyYear",LENGTH("SvyMonthNum"),"SvyMonthNum"';
             }
         }
     });
