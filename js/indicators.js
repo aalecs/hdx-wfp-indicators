@@ -358,6 +358,26 @@ function initCountry(ADM0_CODE){
     loadData(sql,ADM0_CODE);
 }
 
+function filterRecords(records){
+    var final = [];
+    for (var i = 0; i < records.length; i++){
+        var item = records[i];
+
+        // implementing filtering by criteria (CnfIntvHi-CnfIntvLo)/Mean<=0.12 on the client side
+        //    since the fields couldn't be altered on the datastore
+        var cnfIntvHi = parseFloat(item.CnfIntvHi);
+        var cnfIntvLo = parseFloat(item.CnfIntvLo);
+        var mean = parseFloat(item.Mean);
+        var value = (cnfIntvHi - cnfIntvLo) / mean;
+        if (value <= 0.12){
+            final.push(item);
+        } else {
+            //console.log("filtered:" + value);
+        }
+    }
+    return final;
+}
+
 function loadData(sql,countryID){
     
     var data = encodeURIComponent(JSON.stringify({sql: sql}));
@@ -368,7 +388,10 @@ function loadData(sql,countryID){
       url: apiURL,
       data: data,
       success: function(data) {
-          loadGeo(countryID,data.result.records);
+          console.time("filterRecords");
+          var records = filterRecords(data.result.records);
+          console.timeEnd("filterRecords");
+          loadGeo(countryID,records);
       }
     });
 }
