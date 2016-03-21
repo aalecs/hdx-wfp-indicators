@@ -363,16 +363,50 @@ function filterRecords(records){
     for (var i = 0; i < records.length; i++){
         var item = records[i];
 
-        // implementing filtering by criteria (CnfIntvHi-CnfIntvLo)/Mean<=0.12 on the client side
+        // implementing filtering by following criteria on the client side
         //    since the fields couldn't be altered on the datastore
-        var cnfIntvHi = parseFloat(item.CnfIntvHi);
-        var cnfIntvLo = parseFloat(item.CnfIntvLo);
-        var mean = parseFloat(item.Mean);
-        var value = (cnfIntvHi - cnfIntvLo) / mean;
-        if (value <= 0.12){
+        //New Filter :)
+        /**
+         *  StDev IS NULL OR
+         *
+         *  (
+         *      StDev IS NOT NULL AND Variable LIKE '%=%' AND
+         *      (
+         *          ISNULL(CnfIntvHi,1)-ISNULL(CnfIntvLo,0)
+         *      )/Mean<=0.12
+         *      OR
+         *      (
+         *          StDev IS NOT NULL AND Variable NOT LIKE '%=%' AND
+         *          (
+         *              ISNULL(CnfIntvHi,Pctl95)-ISNULL(CnfIntvLo,0)
+         *          )
+         *              /Mean<=0.12
+         *
+         *  )
+         */
+        if (item.StDev == null || item.StDev == ""){
             final.push(item);
         } else {
-            //console.log("filtered:" + value);
+            if (item.Variable.indexOf("=") > -1){
+                var cnfIntvHi = 1;
+                if (item.CnfIntvHi != null && item.CnfIntvHi != "")
+                    cnfIntvHi = parseFloat(item.CnfIntvHi);
+                var cnfIntvLo = 0;
+                if (item.CnfIntvLo != null && item.CnfIntvLo != "")
+                    cnfIntvLo = parseFloat(item.CnfIntvLo);
+                var mean = parseFloat(item.Mean);
+                var value = (cnfIntvHi - cnfIntvLo) / mean;
+                if (value <= 0.12){
+                    final.push(item);
+                } else {
+                    if (item.CnfIntvHi == null || item.CnfIntvHi == ""){
+                        cnfIntvHi = item.Pctl95;
+                    }
+                    value = (cnfIntvHi - cnfIntvLo) / mean;
+                    if (value <= 0.12)
+                        final.push(item);
+                }
+            }
         }
     }
     return final;
